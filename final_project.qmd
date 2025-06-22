@@ -1,6 +1,7 @@
 ---
 title: "Global Trends: Population, Urbanization & CO2 "
 format: dashboard
+theme: journal
 ---
 
 ```{python}
@@ -83,14 +84,17 @@ fig_map.show()
 ##
 
 ### 
+:::{.valuebox title = "Global average CO₂ per capita in 2022" color="info" icon="globe"}
 ```{python}
 # Convert to numeric first
 df_co2["co2_per_capita"] = pd.to_numeric(df_co2["co2_per_capita"], errors="coerce")
 
 # Display Element 5: Value box
 global_avg_co2 = df_co2[df_co2["year"] == latest_year]["co2_per_capita"].mean().round(2)
-print(f"🌐 Global average CO₂ per capita in {latest_year}: {global_avg_co2} tons")
+print(f"{global_avg_co2} tons")
 ```
+
+:::
 
 ###
 ```{python}
@@ -171,11 +175,14 @@ fig4.show()
 The line chart shows an **increasing trend** in the population of all countries over time. However, a **plateau** can be observed in the population of **China** in the recent years, followed by a **projection of decrease** in population.
 
 ###
+:::{.valuebox title = "Projected Global Population in 2100" color="secondary" icon="bar-chart"}
 ```{python}
 # Display Element 10: Value Box – Global population latest year
 global_pop = df_pop[df_pop["year"] == df_pop["year"].max()]["population"].sum()
-print(f"🌐 Projected Global population in {df_pop['year'].max()}: {global_pop/1e9:.2f} billion")
+print(f"{global_pop/1e9:.2f} billion")
 ```
+
+:::
 
 # Urbanization and Indicator Relationships
 

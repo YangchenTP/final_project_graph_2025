@@ -1,0 +1,261 @@
+---
+title: "Global Trends: Population, Urbanization & CO2 "
+format: dashboard
+---
+
+```{python}
+import pandas as pd
+import plotly.express as px
+```
+
+# Dashboard
+
+```{python}
+# Display Element 1 : Welcome Text
+```
+
+Hello Professors!
+This dashboard presents interactive visualizations based on Gapminder data, focusing on:
+
+- **CO₂ Emissions Per Capita**
+- **Population Over Time**
+- **Urbanization and its Relationship with CO₂ Emissions Per Capita and Population Over Time**
+
+Use the navigation bar to explore each section.
+
+# CO2 Emissions Per Capita
+
+```{python}
+df_co2 = pd.read_csv("data/co2_pcap_cons.csv")
+df_co2 = df_co2.melt(id_vars=["country"], var_name="year", value_name="co2_per_capita")
+df_co2["year"] = df_co2["year"].astype(int)
+df_co2 = df_co2.dropna()
+```
+
+##
+
+```{python}
+# Display Element 2: Bar Chart - Top emitters latest year
+latest_year = df_co2["year"].max()
+latest_data = (
+    df_co2[df_co2["year"] == latest_year]
+    .sort_values("co2_per_capita", ascending=False)
+    .head(15)
+)
+
+fig1 = px.bar(
+    latest_data,
+    x="country",
+    y="co2_per_capita",
+    title=f"Top 15 CO₂ Emitters Per Capita in {latest_year}",
+    labels={"co2_per_capita": "CO₂ (tons per person)"},
+)
+fig1.show()
+```
+
+##
+
+```{python}
+# Display Element 3: Line Chart - Historical trend for selected countries
+countries = ["United States", "China", "India", "Germany", "Brazil"]
+df_selected = df_co2[df_co2["country"].isin(countries)]
+
+fig2 = px.line(
+    df_selected,
+    x="year",
+    y="co2_per_capita",
+    color="country",
+    title="CO₂ Emissions Per Capita Over Time",
+)
+fig2.show()
+```
+
+##
+
+```{python}
+# Display Element 4: Map
+fig_map = px.choropleth(latest_data, locations="country", locationmode="country names",
+                        color="co2_per_capita", title="World Map of CO₂ Per Capita",
+                        color_continuous_scale="Viridis")
+fig_map.show()
+```
+
+##
+
+### 
+```{python}
+# Convert to numeric first
+df_co2["co2_per_capita"] = pd.to_numeric(df_co2["co2_per_capita"], errors="coerce")
+
+# Display Element 5: Value box
+global_avg_co2 = df_co2[df_co2["year"] == latest_year]["co2_per_capita"].mean().round(2)
+print(f"🌐 Global average CO₂ per capita in {latest_year}: {global_avg_co2} tons")
+```
+
+###
+```{python}
+# Display Element 6: Highest and lowest CO₂
+latest_data["co2_per_capita"] = pd.to_numeric(latest_data["co2_per_capita"], errors="coerce")
+extremes = pd.concat([
+    latest_data.nlargest(1, "co2_per_capita"),
+    latest_data.nsmallest(1, "co2_per_capita")
+])[["country", "co2_per_capita"]]
+
+extremes.rename(columns={"country": "Country", "co2_per_capita": "CO₂ per Capita"}).reset_index(drop=True)
+extremes.style.set_caption("Highest and Lowest CO2 Emissions Per Capita")
+```
+
+# Population Trends
+
+```{python}
+def clean_pop(x):
+    try:
+        if isinstance(x, str):
+            if "M" in x:
+                return float(x.replace("M", "")) * 1e6
+            elif "k" in x:
+                return float(x.replace("k", "")) * 1e3
+            elif "." in x or x.isdigit():
+                return float(x)
+    except:
+        return None
+```
+
+```{python}
+df_pop = pd.read_csv("data/pop.csv")
+df_pop = df_pop.melt(id_vars=["country"], var_name="year", value_name="population")
+df_pop["year"] = df_pop["year"].astype(int)
+df_pop["population"] = df_pop["population"].apply(clean_pop)
+df_pop = df_pop.dropna()
+```
+
+##
+```{python}
+# Display Element 7: Latest year bar chart
+latest = (
+    df_pop[df_pop["year"] == df_pop["year"].max()]
+    .sort_values("population", ascending=False)
+    .head(15)
+)
+fig3 = px.bar(
+    latest, x="country", y="population", title="Top 15 Most Populous Countries"
+)
+fig3.show()
+```
+
+##
+```{python}
+# Display Element 8: Time series line chart
+countries = ["India", "China", "USA", "Indonesia", "Brazil"]
+df_selected = df_pop[df_pop["country"].isin(countries)]
+
+fig4 = px.line(
+    df_selected,
+    x="year",
+    y="population",
+    color="country",
+    title="Population Trends Over Time",
+)
+fig4.show()
+```
+
+##
+
+###
+
+```{python}
+# Display Element 9: Text box
+# Description of Line Chart
+```
+
+The line chart shows an **increasing trend** in the population of all countries over time. However, a **plateau** can be observed in the population of **China** in the recent years, followed by a **projection of decrease** in population.
+
+###
+```{python}
+# Display Element 10: Value Box – Global population latest year
+global_pop = df_pop[df_pop["year"] == df_pop["year"].max()]["population"].sum()
+print(f"🌐 Projected Global population in {df_pop['year'].max()}: {global_pop/1e9:.2f} billion")
+```
+
+# Urbanization and Indicator Relationships
+
+```{python}
+# Load & clean
+df_urban = pd.read_csv("data/urban_population_percent_of_total.csv")
+df_urban = df_urban.melt(id_vars=["country"], var_name="year", value_name="urban_pct")
+df_urban["year"] = df_urban["year"].astype(int)
+
+df_pop = pd.read_csv("data/pop.csv")
+df_pop = df_pop.melt(id_vars=["country"], var_name="year", value_name="population")
+df_pop["year"] = df_pop["year"].astype(int)
+
+
+def parse_population(x):
+    try:
+        x = str(x).strip()
+        if "B" in x:
+            return float(x.replace("B", "")) * 1e9
+        elif "M" in x:
+            return float(x.replace("M", "")) * 1e6
+        elif "k" in x:
+            return float(x.replace("k", "")) * 1e3
+        else:
+            return float(x)
+    except:
+        return None
+
+
+df_pop["population"] = df_pop["population"].apply(parse_population)
+df_pop = df_pop.dropna(subset=["population"])
+
+df_co2 = pd.read_csv("data/co2_pcap_cons.csv")
+df_co2 = df_co2.melt(id_vars=["country"], var_name="year", value_name="co2_per_capita")
+df_co2["year"] = df_co2["year"].astype(int)
+```
+
+```{python}
+# Merge
+merged = pd.merge(df_urban, df_co2, on=["country", "year"])
+merged = pd.merge(merged, df_pop, on=["country", "year"])
+merged = merged.dropna()
+```
+
+##
+```{python}
+# Display Element 11: Bubble chart
+latest = merged[merged['year'] == merged['year'].max()]
+
+fig5 = px.scatter(latest, x="urban_pct", y="co2_per_capita", size="population", color="country",
+                  title="Urban Population vs CO₂ Per Capita",
+                  labels={"urban_pct": "Urban Population (%)", "co2_per_capita": "CO₂ per Capita"})
+fig5.show()
+```
+
+##
+
+### Insights
+
+```{python}
+# Display Element 12: Text Box
+# Description of Bubble Chart
+```
+
+Countries with higher urbanization tend to have **higher CO₂ emissions per capita**, though there are exceptions. The bubble chart shows a general trend but also highlights outliers where population or development stage affects emissions.
+
+###
+```{python}
+# Display Element 13: Table – Top 5 most urbanized countries
+top_urban = latest.sort_values("urban_pct", ascending=False)[["country", "urban_pct"]].head(5)
+top_urban.rename(columns={"country": "Country", "urban_pct": "Urban Population (%)"}).reset_index(drop=True)
+```
+
+##
+```{python}
+
+# Display Element 14: Line chart – Global average urbanization
+urban_trend = df_urban.groupby("year")["urban_pct"].mean().reset_index()
+fig_trend = px.line(urban_trend, x="year", y="urban_pct",
+                    title="Global Urbanization Trend Over Time",
+                    labels={"urban_pct": "Avg. Urban Population (%)"})
+fig_trend.show()
+```

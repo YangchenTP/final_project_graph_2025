@@ -12,7 +12,7 @@ import plotly.express as px
 # Dashboard
 
 ```{python}
-# Display Element 1 : Welcome Text
+# Display Element 1 : Welcome Text/Introduction
 ```
 
 Hello Professors!
@@ -22,7 +22,7 @@ This dashboard presents interactive visualizations based on Gapminder data, focu
 - **Population Over Time**
 - **Urbanization and its Relationship with CO₂ Emissions Per Capita and Population Over Time**
 
-Use the navigation bar to explore each section.
+Please use the navigation bar to explore each section.
 
 # CO2 Emissions Per Capita
 
@@ -73,7 +73,7 @@ fig2.show()
 
 ## {height="30%"}
 
-### {width="35%"}
+### {width="40%"}
 ```{python}
 # Display Element 4: Map
 fig_map = px.choropleth(latest_data, locations="country", locationmode="country names",
@@ -94,7 +94,7 @@ extremes = pd.concat([
 extremes.rename(columns={"country": "Country", "co2_per_capita": "CO₂ per Capita"}).reset_index(drop=True)
 ```
 
-### {width="30%"}
+### {width="25%"}
 :::{.valuebox title = "Global average CO₂ per capita in 2022" color="info" icon="globe"}
 ```{python}
 # Convert to numeric first

@@ -33,7 +33,7 @@ df_co2["year"] = df_co2["year"].astype(int)
 df_co2 = df_co2.dropna()
 ```
 
-##
+## {height="35%"}
 
 ```{python}
 # Display Element 2: Bar Chart - Top emitters latest year
@@ -54,7 +54,7 @@ fig1 = px.bar(
 fig1.show()
 ```
 
-##
+## {height="35%"}
 
 ```{python}
 # Display Element 3: Line Chart - Historical trend for selected countries
@@ -71,8 +71,9 @@ fig2 = px.line(
 fig2.show()
 ```
 
-##
+## {height="30%"}
 
+### {width="35%"}
 ```{python}
 # Display Element 4: Map
 fig_map = px.choropleth(latest_data, locations="country", locationmode="country names",
@@ -81,9 +82,19 @@ fig_map = px.choropleth(latest_data, locations="country", locationmode="country 
 fig_map.show()
 ```
 
-##
+### {width="35%"}
+```{python}
+# Display Element 6: Highest and lowest CO₂
+latest_data["co2_per_capita"] = pd.to_numeric(latest_data["co2_per_capita"], errors="coerce")
+extremes = pd.concat([
+    latest_data.nlargest(1, "co2_per_capita"),
+    latest_data.nsmallest(1, "co2_per_capita")
+])[["country", "co2_per_capita"]]
 
-### 
+extremes.rename(columns={"country": "Country", "co2_per_capita": "CO₂ per Capita"}).reset_index(drop=True)
+```
+
+### {width="30%"}
 :::{.valuebox title = "Global average CO₂ per capita in 2022" color="info" icon="globe"}
 ```{python}
 # Convert to numeric first
@@ -95,19 +106,6 @@ print(f"{global_avg_co2} tons")
 ```
 
 :::
-
-###
-```{python}
-# Display Element 6: Highest and lowest CO₂
-latest_data["co2_per_capita"] = pd.to_numeric(latest_data["co2_per_capita"], errors="coerce")
-extremes = pd.concat([
-    latest_data.nlargest(1, "co2_per_capita"),
-    latest_data.nsmallest(1, "co2_per_capita")
-])[["country", "co2_per_capita"]]
-
-extremes.rename(columns={"country": "Country", "co2_per_capita": "CO₂ per Capita"}).reset_index(drop=True)
-extremes.style.set_caption("Highest and Lowest CO2 Emissions Per Capita")
-```
 
 # Population Trends
 
